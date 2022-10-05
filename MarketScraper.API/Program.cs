@@ -28,7 +28,7 @@ builder.Services.AddHangfire(x => x.UseMongoStorage("mongodb://localhost:27023/M
 }));
 
 builder.Services.AddSingleton<IScheduleService, ScheduleService>();
-builder.Services.AddScoped<IMarketService, MarketService>();
+builder.Services.AddScoped<IMarketService, OlxMarketService>();
 
 
 var app = builder.Build();

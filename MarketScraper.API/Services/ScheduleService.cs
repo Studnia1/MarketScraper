@@ -5,7 +5,7 @@ namespace MarketScraper.API.Services
 {
     public class ScheduleService : IScheduleService
     {
-        private const string fiveMinuteCronExpression = "*/5 * * * *";
+        private const string fiveMinuteCronExpression = "*/1 * * * *";
 
         private readonly IServiceProvider _serviceProvider;
 

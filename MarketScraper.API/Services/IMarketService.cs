@@ -2,6 +2,6 @@
 {
     public interface IMarketService
     {
-        void Scrap();
+        Task Scrap();
     }
 }
