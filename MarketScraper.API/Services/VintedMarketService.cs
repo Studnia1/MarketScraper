@@ -1,20 +1,13 @@
 ﻿using HtmlAgilityPack;
 using MarketScraper.API.Models;
-using MarketScraper.API.Repository;
 
 namespace MarketScraper.API.Services
 {
-	public class OlxMarketService : IMarketService
+    public class VintedMarketService : IMarketService
     {
         private const string baseUrl = "https://www.olx.pl/d/elektronika/gry-konsole/q-słuchawki-bang/";
         private const string olxUrl = "https://www.olx.pl";
 
-        IProductRepository mongoDb;
-
-        public OlxMarketService(IProductRepository mongoDb)
-        {
-            this.mongoDb = mongoDb;
-        }   
 
         public async Task Scrap()
         {
@@ -22,7 +15,6 @@ namespace MarketScraper.API.Services
             var document = web.Load(baseUrl);
             var nodes = document.DocumentNode.SelectNodes("//div[@class='css-qfzx1y']");
             var olxData = document.QuerySelectorAll("div.css-19ucd76");
-            var productsList = new List<ProductDto>();
             foreach (var row in olxData)
             {
                 var newData = new ProductDto();
@@ -31,18 +23,17 @@ namespace MarketScraper.API.Services
                 var urlNode = row.QuerySelector("a");
                 var imgNode = row.QuerySelector("img");
 
-                if (titleNode != null && urlNode != null && priceFatherNode != null && imgNode != null)
+                if (titleNode != null || urlNode != null || priceFatherNode != null || imgNode != null)
                 {
-                    newData.ProductUrl = olxUrl + urlNode.GetAttributeValue("href", null);
-                    newData.PhotoUrl = imgNode.GetAttributeValue("src", null);
-                    newData.Name = titleNode.InnerText;
-                    newData.Price = decimal.Parse(priceFatherNode.LastChild.InnerText.Replace(" zł", string.Empty).Replace("do negocjacji", string.Empty));
-                    productsList.Add(newData);
-                   
+                    var url = olxUrl + urlNode.GetAttributeValue("href", null);
+                    var img = imgNode.GetAttributeValue("src", null);
+
+                    var price = priceFatherNode.LastChild.InnerText.Replace(" zł", string.Empty).Replace("do negocjacji", string.Empty);
+
+                    Console.WriteLine("siema");
 
                 }
             }
-            await mongoDb.CreateAsync(productsList);
         }
     }
 }

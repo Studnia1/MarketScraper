@@ -3,6 +3,8 @@ using Hangfire;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
+using MarketScraper.API.Models;
+using MarketScraper.API.Repository;
 using MarketScraper.API.Services;
 using System;
 
@@ -16,7 +18,9 @@ builder.Services.AddHangfireServer();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHangfire(x => x.UseMongoStorage("mongodb://localhost:27023/MarketScraper", new MongoStorageOptions
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDB"));
+
+builder.Services.AddHangfire(x => x.UseMongoStorage(builder.Configuration["MongoDB:ConnectionString"], new MongoStorageOptions
 {
     MigrationOptions = new MongoMigrationOptions
     {
@@ -27,8 +31,12 @@ builder.Services.AddHangfire(x => x.UseMongoStorage("mongodb://localhost:27023/M
     CheckQueuedJobsStrategy = CheckQueuedJobsStrategy.TailNotificationsCollection
 }));
 
+
+
+builder.Services.AddSingleton<IProductRepository, ProductRespository>();
 builder.Services.AddSingleton<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IMarketService, OlxMarketService>();
+builder.Services.AddScoped<IMarketService, VintedMarketService>();
 
 
 var app = builder.Build();
@@ -50,7 +58,7 @@ app.UseHangfireDashboard();
 
 var someService = app.Services.GetService<IScheduleService>();
 
-someService.RunAtTimeOf(DateTime.Now);
+someService?.RunAtTimeOf(DateTime.Now);
 
 
 app.Run();

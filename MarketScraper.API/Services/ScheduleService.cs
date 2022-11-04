@@ -14,13 +14,13 @@ namespace MarketScraper.API.Services
             this._serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
-        public async Task Run(IJobCancellationToken token)
+        public void Run(IJobCancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            await RunAtTimeOf(DateTime.Now);
+             RunAtTimeOf(DateTime.Now);
         }
 
-        public async Task RunAtTimeOf(DateTime now)
+        public void  RunAtTimeOf(DateTime now)
         {
             using IServiceScope scope = this._serviceProvider.CreateScope();
             var myJobService = scope.ServiceProvider.GetServices<IMarketService>();
