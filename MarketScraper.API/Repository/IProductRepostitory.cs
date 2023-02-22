@@ -6,5 +6,6 @@ namespace MarketScraper.API.Repository
     {
         Task CreateAsync(List<ProductDto> products);
         Task<List<ProductDto>> GetAsync(string tag);
+        Task<List<TitleDto>> GetTitles();
     }
 }

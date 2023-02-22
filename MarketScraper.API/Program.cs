@@ -36,8 +36,8 @@ builder.Services.AddHangfire(x => x.UseMongoStorage(builder.Configuration["Mongo
 builder.Services.AddSingleton<IProductRepository, ProductRespository>();
 builder.Services.AddSingleton<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IMarketService, OlxMarketService>();
-builder.Services.AddScoped<IMarketService, VintedMarketService>();
-
+/*builder.Services.AddScoped<IMarketService, VintedMarketService>();
+*/
 
 var app = builder.Build();
 

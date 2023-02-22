@@ -1,21 +1,36 @@
 ﻿using HtmlAgilityPack;
 using MarketScraper.API.Models;
+using MarketScraper.API.Repository;
 
 namespace MarketScraper.API.Services
 {
-    public class VintedMarketService : IMarketService
+    public class VintedMarketService /*: IMarketService*/
     {
-        private const string baseUrl = "https://www.olx.pl/d/elektronika/gry-konsole/q-słuchawki-bang/";
         private const string olxUrl = "https://www.olx.pl";
 
+        IProductRepository mongoDb;
 
-        public async Task Scrap()
+        public VintedMarketService(IProductRepository mongoDb)
+        {
+            this.mongoDb = mongoDb;
+        }
+
+        public async Task IterateScrapThroughAllGames()
+        {
+            var titlesList = await mongoDb.GetTitles();
+            foreach (var title in titlesList)
+            {
+                await Scrap(title);
+            }
+        }
+
+        public async Task Scrap(TitleDto title)
         {
             var web = new HtmlWeb();
-            var document = web.Load(baseUrl);
-            var nodes = document.DocumentNode.SelectNodes("//div[@class='css-qfzx1y']");
-            var olxData = document.QuerySelectorAll("div.css-19ucd76");
-            foreach (var row in olxData)
+            var document = web.Load($"https://www.olx.pl/d/elektronika/gry-konsole/gry/q-{title.Title}/");
+            var nodes = document.DocumentNode.SelectNodes("//div[@class='web_ui__ItemBox__box']");
+            var productsList = new List<ProductDto>();
+            foreach (var row in nodes)
             {
                 var newData = new ProductDto();
                 var priceFatherNode = row.QuerySelector("div.css-u2ayx9");
@@ -23,17 +38,20 @@ namespace MarketScraper.API.Services
                 var urlNode = row.QuerySelector("a");
                 var imgNode = row.QuerySelector("img");
 
-                if (titleNode != null || urlNode != null || priceFatherNode != null || imgNode != null)
+                if (titleNode != null && urlNode != null && priceFatherNode != null && imgNode != null)
                 {
-                    var url = olxUrl + urlNode.GetAttributeValue("href", null);
-                    var img = imgNode.GetAttributeValue("src", null);
-
-                    var price = priceFatherNode.LastChild.InnerText.Replace(" zł", string.Empty).Replace("do negocjacji", string.Empty);
-
-                    Console.WriteLine("siema");
-
+                    var price = decimal.Parse(priceFatherNode.LastChild.InnerText.Replace(" zł", string.Empty).Replace("do negocjacji", string.Empty));
+                    if (price < title.PriceLimit)
+                    {
+                        newData.ProductUrl = olxUrl + urlNode.GetAttributeValue("href", null);
+                        newData.PhotoUrl = imgNode.GetAttributeValue("src", null);
+                        newData.Name = titleNode.InnerText;
+                        newData.Price = price;
+                        productsList.Add(newData);
+                    }
                 }
             }
+            await mongoDb.CreateAsync(productsList);
         }
     }
 }

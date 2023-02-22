@@ -4,6 +4,7 @@
     {
         public string? ConnectionURI { get; set; }
         public string? DatabaseName { get; set; }
-        public string? CollectionName { get; set; }
+        public string? CollectionProductsName { get; set; }
+        public string? CollectionTitlesName { get; set; }
     }
 }

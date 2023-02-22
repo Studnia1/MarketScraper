@@ -1,7 +1,10 @@
-﻿namespace MarketScraper.API.Services
+﻿using MarketScraper.API.Models;
+
+namespace MarketScraper.API.Services
 {
     public interface IMarketService
     {
-        Task Scrap();
+        Task IterateScrapThroughAllGames();
+        Task Scrap(TitleDto title);
     }
 }

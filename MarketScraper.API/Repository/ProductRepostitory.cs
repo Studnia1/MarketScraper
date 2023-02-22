@@ -9,12 +9,14 @@ namespace MarketScraper.API.Repository
     public class ProductRespository : IProductRepository
     {
         private readonly IMongoCollection<ProductDto> _productCollection;
+        private readonly IMongoCollection<TitleDto> _titlesCollection;
 
         public ProductRespository(IOptions<MongoDbSettings> mongoDBSettings)
         {
             MongoClient client = new MongoClient(mongoDBSettings.Value.ConnectionURI);
             IMongoDatabase dataBase = client.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _productCollection = dataBase.GetCollection<ProductDto>(mongoDBSettings.Value.CollectionName);
+            _productCollection = dataBase.GetCollection<ProductDto>(mongoDBSettings.Value.CollectionProductsName);
+            _titlesCollection = dataBase.GetCollection<TitleDto>(mongoDBSettings.Value.CollectionTitlesName);
 
             var options = new CreateIndexOptions { Unique = true };
             var indexModel = new CreateIndexModel<ProductDto>("{ProductUrl : 1}", options);
@@ -30,6 +32,12 @@ namespace MarketScraper.API.Repository
         public async Task<List<ProductDto>> GetAsync(string tag)
         {
             var results =  await _productCollection.FindAsync(c => c.Tag == tag);
+            return results.ToList();
+        }
+
+        public async Task<List<TitleDto>> GetTitles()
+        {
+            var results = await _titlesCollection.FindAsync(c=> c.Title == "drakengard");
             return results.ToList();
         }
     }

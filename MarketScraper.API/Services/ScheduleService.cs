@@ -26,7 +26,7 @@ namespace MarketScraper.API.Services
             var myJobService = scope.ServiceProvider.GetServices<IMarketService>();
             foreach (var job in myJobService)
             {
-                AddNewScheduledProcess(() => job.Scrap());
+                AddNewScheduledProcess(() => job.IterateScrapThroughAllGames());
             }
         }
 
